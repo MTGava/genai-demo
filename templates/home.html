@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -98,8 +99,8 @@
             transition: top 0.3s, font-size 0.3s;
         }
 
-        .input-container input:valid + label,
-        .input-container input:focus + label {
+        .input-container input:valid+label,
+        .input-container input:focus+label {
             top: 0;
             font-size: 12px;
             color: #563d7c;
@@ -157,6 +158,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h1>Bem vindo(a) ao BYTEAI!</h1>
@@ -184,28 +186,28 @@
     <script>
 
         function displayImage(event) {
-                const file = event.target.files[0];
+            const file = event.target.files[0];
 
-                if (file) {
-                    const reader = new FileReader();
+            if (file) {
+                const reader = new FileReader();
 
-                    reader.onload = function (e) {
-                        const imageUrl = e.target.result;
+                reader.onload = function (e) {
+                    const imageUrl = e.target.result;
 
-                        const imageDisplay = document.getElementById('imageDisplay');
-                        imageDisplay.innerHTML = `<br><img src="${imageUrl}" alt="Imagem Selecionada" id="uploadedImage" style="max-width: 100%; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">`;
-                    };
+                    const imageDisplay = document.getElementById('imageDisplay');
+                    imageDisplay.innerHTML = `<br><img src="${imageUrl}" alt="Imagem Selecionada" id="uploadedImage" style="max-width: 100%; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">`;
+                };
 
-                    reader.readAsDataURL(file);
-                }
+                reader.readAsDataURL(file);
             }
+        }
 
         const imageInput = document.getElementById('imageInput');
         const imageUploadForm = document.getElementById('imageUploadForm');
         const outputDiv = document.getElementById('outputDiv');
         const loadingIndicator = document.getElementById('loadingIndicator');
         const descricaoSpan = document.getElementById('descricao');
-        
+
         imageUploadForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -266,5 +268,6 @@
             }, 2000);
         }
     </script>
-  </body>
+</body>
+
 </html>
