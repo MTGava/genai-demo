@@ -180,7 +180,7 @@
         <div class="output" id="outputDiv" style="display: none">
             <h2>Resultado da API:</h2>
             <p><strong>Descrição:</strong> <span id="descricao"></span></p>
-            <button id="btn" click="play()">Play</button>
+            <button id="btn2" onclick="miau">miau</button>
         </div>
     </div>
     <div id="toastElement" class="toast"></div>
@@ -251,10 +251,6 @@
                     const audio = new Audio();
                     audio.src = sound;
 
-                    function play() {
-                        audio.play();
-                    }
-
                     window.addEventListener("load", () => {
                         const btn = document.querySelector("#btn");
                         btn.addEventListener("click", play);
@@ -271,6 +267,12 @@
 
             reader.readAsDataURL(file);
         });
+
+
+        function miau() {
+            audio.play();
+        }
+
 
         function showToast(message, styleClass) {
             const toastElement = document.getElementById('toastElement');
