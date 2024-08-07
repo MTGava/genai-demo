@@ -180,6 +180,7 @@
         <div class="output" id="outputDiv" style="display: none">
             <h2>Resultado da API:</h2>
             <p><strong>Descrição:</strong> <span id="descricao"></span></p>
+            <button id="btn" click="play()">Play</button>
         </div>
     </div>
     <div id="toastElement" class="toast"></div>
@@ -244,6 +245,20 @@
                     const data = await response.json();
 
                     descricaoSpan.textContent = data.description;
+
+                    const sound =
+                        `data:audio/wav;base64,${data}`;
+                    const audio = new Audio();
+                    audio.src = sound;
+
+                    function play() {
+                        audio.play();
+                    }
+
+                    window.addEventListener("load", () => {
+                        const btn = document.querySelector("#btn");
+                        btn.addEventListener("click", play);
+                    });
 
                     outputDiv.style.display = 'block';
                 } catch (error) {
