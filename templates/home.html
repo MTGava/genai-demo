@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -99,8 +98,8 @@
             transition: top 0.3s, font-size 0.3s;
         }
 
-        .input-container input:valid+label,
-        .input-container input:focus+label {
+        .input-container input:valid + label,
+        .input-container input:focus + label {
             top: 0;
             font-size: 12px;
             color: #563d7c;
@@ -156,9 +155,14 @@
         .toast-failure {
             background-color: #f44336;
         }
+
+        .audio-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
     </style>
 </head>
-
 <body>
     <div class="container">
         <h1>Bem vindo(a) ao BYTEAI!</h1>
@@ -179,36 +183,53 @@
         </form>
         <div class="output" id="outputDiv" style="display: none">
             <h2>Resultado da API:</h2>
-            <p><strong>Descrição:</strong> <span id="descricao"></span></p>
-            <button id="btn2" onclick="miau">miau</button>
+            <div class="audio-container">
+                <audio id="myAudio" controls></audio>
+            </div>
         </div>
     </div>
     <div id="toastElement" class="toast"></div>
     <script>
 
-        function displayImage(event) {
-            const file = event.target.files[0];
+        function playBase64Audio(base64Data) {
+            const byteString = atob(base64Data);
+            const arrayBuffer = new ArrayBuffer(byteString.length);
+            const uint8Array = new Uint8Array(arrayBuffer);
+            for (let i = 0; i < byteString.length; i++) {
+                uint8Array[i] = byteString.charCodeAt(i);   
 
-            if (file) {
-                const reader = new FileReader();
-
-                reader.onload = function (e) {
-                    const imageUrl = e.target.result;
-
-                    const imageDisplay = document.getElementById('imageDisplay');
-                    imageDisplay.innerHTML = `<br><img src="${imageUrl}" alt="Imagem Selecionada" id="uploadedImage" style="max-width: 100%; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">`;
-                };
-
-                reader.readAsDataURL(file);
             }
+            const blob = new Blob([uint8Array],   
+        { type: 'audio/mpeg' });
+            const audio = document.getElementById('myAudio');
+            audio.src = URL.createObjectURL(blob);
+            audio.load(); // Preload the audio
+            audio.playbackRate = 1.5
         }
+
+        function displayImage(event) {
+                const file = event.target.files[0];
+
+                if (file) {
+                    const reader = new FileReader();
+
+                    reader.onload = function (e) {
+                        const imageUrl = e.target.result;
+
+                        const imageDisplay = document.getElementById('imageDisplay');
+                        imageDisplay.innerHTML = `<br><img src="${imageUrl}" alt="Imagem Selecionada" id="uploadedImage" style="max-width: 100%; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">`;
+                    };
+
+                    reader.readAsDataURL(file);
+                }
+            }
 
         const imageInput = document.getElementById('imageInput');
         const imageUploadForm = document.getElementById('imageUploadForm');
         const outputDiv = document.getElementById('outputDiv');
         const loadingIndicator = document.getElementById('loadingIndicator');
         const descricaoSpan = document.getElementById('descricao');
-
+        
         imageUploadForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -244,17 +265,7 @@
 
                     const data = await response.json();
 
-                    descricaoSpan.textContent = data.description;
-
-                    const sound =
-                        `data:audio/wav;base64,${data}`;
-                    const audio = new Audio();
-                    audio.src = sound;
-
-                    window.addEventListener("load", () => {
-                        const btn = document.querySelector("#btn");
-                        btn.addEventListener("click", play);
-                    });
+                    playBase64Audio(data.description);
 
                     outputDiv.style.display = 'block';
                 } catch (error) {
@@ -268,12 +279,6 @@
             reader.readAsDataURL(file);
         });
 
-
-        function miau() {
-            audio.play();
-        }
-
-
         function showToast(message, styleClass) {
             const toastElement = document.getElementById('toastElement');
             toastElement.textContent = message;
@@ -286,5 +291,8 @@
         }
     </script>
 </body>
+</body>
+
+  </body>
 
 </html>

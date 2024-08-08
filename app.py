@@ -30,8 +30,8 @@ def describe_image():
     if 'image' not in request.json:
         return jsonify({'error': 'No image data sent in request body'}), 400
     
-    if 'context' not in request.json:
-        context = 'Descreva com detalhes'
+    if 'context' not in request.json or request.json['context'] == '':
+        context = 'Descreva com detalhes em Portgues Brasil'
     else:
         context = request.json['context']
 
@@ -45,7 +45,7 @@ def describe_image():
         response = model.generate_content([context, image])
         response.resolve()
 
-        tts = gTTS(text=response.text, lang='pt-br')
+        tts = gTTS(text=response.text, lang='PT-BR')
 
         # Salve o áudio em um arquivo temporário
         filename = "audio.mp3"
