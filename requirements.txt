@@ -3,4 +3,4 @@ flask-cors
 Gunicorn
 google-generativeai
 Pillow
-gTTS
+edge-tts

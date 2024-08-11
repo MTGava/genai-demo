@@ -5,7 +5,7 @@ import io
 import os
 from PIL import Image
 import google.generativeai as genai
-from gtts import gTTS
+import edge_tts
 from base64 import b64encode
 
 app = Flask(__name__)
@@ -13,7 +13,8 @@ CORS(app) # Habilitar CORS para todas as rotas da sua aplicação
 
 genai.configure(api_key=os.environ.get('GOOGLE_API_KEY'))
 model = genai.GenerativeModel(model_name="gemini-1.5-flash")
-# set_api_key(api_key=os.environ.get('ELEVEN_API_KEY'))
+VOICE = "pt-BR-AntonioNeural"
+OUTPUT_FILE = "audio.mp3"
 
 @app.route('/hello-world')
 def hello_world():
@@ -45,12 +46,13 @@ def describe_image():
         response = model.generate_content([context, image])
         response.resolve()
 
-        tts = gTTS(text=response.text, lang='PT-BR')
+        communicate = edge_tts.Communicate(text=response.text, voice=VOICE, rate="+30%")
+        communicate.save(OUTPUT_FILE)
 
-        # Salve o áudio em um arquivo temporário
-        filename = "audio.mp3"
-        os.remove(filename)
-        tts.save(filename)
+        with open(OUTPUT_FILE, "wb") as file:
+            for chunk in communicate.stream_sync():
+                if chunk["type"] == "audio":
+                    file.write(chunk["data"])
 
         # Leia o arquivo MP3 como binário
         with open('audio.mp3', 'rb') as f:
