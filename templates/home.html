@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BYTEAI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -60,7 +61,7 @@
             background-color: #563d7c;
         }
 
-        #imageInput {
+        #imageInput, #microphoneInput {
             display: none;
         }
 
@@ -172,10 +173,14 @@
                     Escolha uma Imagem
                     <input type="file" id="imageInput" accept="image/*" onchange="displayImage(event)" />
                 </label>
+                <label id="record" class="custom-upload-button">
+                    <i class="fa fa-microphone" style="font-size:24px;color:white"></i>
+                </label>
                 <div class="input-container">
                     <input type="text" id="context" class="inputText">
                     <label for="context">Digite o contexto da sua pergunta</label>
-                    <button id="record" class="custom-upload-button">Record</button>
+                    
+                    <!-- <button id="record" class="custom-upload-button">Record</button> -->
                 </div>
             </div>
             <div id="imageDisplay"></div>
@@ -321,9 +326,7 @@
         
         // Combine the audio chunks into a blob, then point the empty audio clip to that blob.
         const blob = new Blob(chunks, {"type": "audio/ogg; codecs=opus"});
-        
-        console.log(blob)
-
+            
         // Usando a função
         blobToBase64(blob)
         .then(base64String => {
@@ -340,13 +343,29 @@
         };
 
         // Set up event handler for the "Record" button.
-        $("#record").on("click", () => {
+        $("#record").on("mousedown", () => {
         if (recording) {
             mediaRecorder.stop();
             recording = false;
+            $("#record").html('<i class="fa fa-microphone" style="font-size:24px;color:red"></i>');
         } else {
             mediaRecorder.start();
             recording = true;
+            $("#record").html('<i class="fa fa-microphone" style="font-size:24px;color:red"></i>');
+            document.querySelector(".inputText").value = ""
+        }
+        });
+
+        $("#record").on("mouseup", () => {
+        if (recording) {
+            mediaRecorder.stop();
+            recording = false;
+            $("#record").html('<i class="fa fa-microphone" style="font-size:24px;color:white"></i>');
+        } else {
+            mediaRecorder.start();
+            recording = true;
+            $("#record").html('<i class="fa fa-microphone" style="font-size:24px;color:white"></i>');
+            document.querySelector(".inputText").value = ""
         }
         });
 
