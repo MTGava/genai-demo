@@ -4,3 +4,4 @@ Gunicorn
 google-generativeai
 Pillow
 edge-tts
+google-cloud-speech

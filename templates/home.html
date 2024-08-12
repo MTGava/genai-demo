@@ -173,8 +173,9 @@
                     <input type="file" id="imageInput" accept="image/*" onchange="displayImage(event)" />
                 </label>
                 <div class="input-container">
-                    <input type="text" id="context" name="context">
+                    <input type="text" id="context" class="inputText">
                     <label for="context">Digite o contexto da sua pergunta</label>
+                    <button id="record" class="custom-upload-button">Record</button>
                 </div>
             </div>
             <div id="imageDisplay"></div>
@@ -189,106 +190,192 @@
         </div>
     </div>
     <div id="toastElement" class="toast"></div>
+
+    <script
+        src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"></script>
     <script>
-
         function playBase64Audio(base64Data) {
-            const byteString = atob(base64Data);
-            const arrayBuffer = new ArrayBuffer(byteString.length);
-            const uint8Array = new Uint8Array(arrayBuffer);
-            for (let i = 0; i < byteString.length; i++) {
-                uint8Array[i] = byteString.charCodeAt(i);   
+        const byteString = atob(base64Data);
+        const arrayBuffer = new ArrayBuffer(byteString.length);
+        const uint8Array = new Uint8Array(arrayBuffer);
+        for (let i = 0; i < byteString.length; i++) {
+            uint8Array[i] = byteString.charCodeAt(i);   
 
-            }
-            const blob = new Blob([uint8Array],   
-        { type: 'audio/mpeg' });
-            const audio = document.getElementById('myAudio');
-            audio.src = URL.createObjectURL(blob);
-            audio.load(); // Preload the audio
         }
+        const blob = new Blob([uint8Array],   
+    { type: 'audio/mpeg' });
+        const audio = document.getElementById('myAudio');
+        audio.src = URL.createObjectURL(blob);
+        audio.load(); // Preload the audio
+    }
 
-        function displayImage(event) {
-                const file = event.target.files[0];
+    function displayImage(event) {
+            const file = event.target.files[0];
 
-                if (file) {
-                    const reader = new FileReader();
+            if (file) {
+                const reader = new FileReader();
 
-                    reader.onload = function (e) {
-                        const imageUrl = e.target.result;
+                reader.onload = function (e) {
+                    const imageUrl = e.target.result;
 
-                        const imageDisplay = document.getElementById('imageDisplay');
-                        imageDisplay.innerHTML = `<br><img src="${imageUrl}" alt="Imagem Selecionada" id="uploadedImage" style="max-width: 100%; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">`;
-                    };
-
-                    reader.readAsDataURL(file);
-                }
-            }
-
-        const imageInput = document.getElementById('imageInput');
-        const imageUploadForm = document.getElementById('imageUploadForm');
-        const outputDiv = document.getElementById('outputDiv');
-        const loadingIndicator = document.getElementById('loadingIndicator');
-        const descricaoSpan = document.getElementById('descricao');
-        
-        imageUploadForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const contextValue = document.getElementById('context').value;
-            const file = imageInput.files[0];
-
-            const reader = new FileReader();
-            reader.onload = async function () {
-                const base64Image = reader.result.split(',')[1];
-
-                const payload = {
-                    context: contextValue,
-                    image: base64Image
+                    const imageDisplay = document.getElementById('imageDisplay');
+                    imageDisplay.innerHTML = `<br><img src="${imageUrl}" alt="Imagem Selecionada" id="uploadedImage" style="max-width: 100%; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">`;
                 };
 
-                try {
-                    loadingIndicator.classList.add('active');
+                reader.readAsDataURL(file);
+            }
+        }
 
-                    const response = await fetch('https://genai-demo-yi6x.onrender.com/describe', {
-                    // const response = await fetch('http://localhost:5000/describe', {
-                        method: 'POST',
-                        mode: 'cors',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(payload)
-                    });
+    const imageInput = document.getElementById('imageInput');
+    const imageUploadForm = document.getElementById('imageUploadForm');
+    const outputDiv = document.getElementById('outputDiv');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    const descricaoSpan = document.getElementById('descricao');
 
-                    if (!response.ok) {
-                        throw new Error('Erro ao chamar a API');
-                    }
+    imageUploadForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
 
-                    showToast('Sucesso ao chamar a API!', 'toast-success');
+        const contextValue = document.getElementById('context').value;
+        const file = imageInput.files[0];
 
-                    const data = await response.json();
+        const reader = new FileReader();
+        reader.onload = async function () {
+            const base64Image = reader.result.split(',')[1];
 
-                    playBase64Audio(data.description);
-
-                    outputDiv.style.display = 'block';
-                } catch (error) {
-                    console.error('Erro:', error);
-                    showToast('Falha ao chamar a API.', 'toast-failure');
-                } finally {
-                    loadingIndicator.classList.remove('active');
-                }
+            const payload = {
+                context: contextValue,
+                image: base64Image
             };
 
-            reader.readAsDataURL(file);
+            try {
+                loadingIndicator.classList.add('active');
+
+                // const response = await fetch('https://genai-demo-yi6x.onrender.com/describe', {
+                const response = await fetch('http://localhost:5000/describe', {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Erro ao chamar a API');
+                }
+
+                showToast('Sucesso ao chamar a API!', 'toast-success');
+
+                const data = await response.json();
+
+                playBase64Audio(data.description);
+
+                outputDiv.style.display = 'block';
+            } catch (error) {
+                console.error('Erro:', error);
+                showToast('Falha ao chamar a API.', 'toast-failure');
+            } finally {
+                loadingIndicator.classList.remove('active');
+            }
+        };
+
+        reader.readAsDataURL(file);
+    });
+
+    function showToast(message, styleClass) {
+        const toastElement = document.getElementById('toastElement');
+        toastElement.textContent = message;
+        toastElement.className = `toast ${styleClass}`;
+        toastElement.style.display = 'block';
+
+        setTimeout(() => {
+            toastElement.style.display = 'none';
+        }, 2000);
+    }
+
+
+    //////////////////////
+    // Set up the AudioContext.
+    const audioCtx = new AudioContext();
+
+    // Top-level variable keeps track of whether we are recording or not.
+    let recording = false;
+
+    // Ask user for access to the microphone.
+    if (navigator.mediaDevices) {
+        navigator.mediaDevices.getUserMedia({"audio": true}).then((stream) => {
+
+        // Instantiate the media recorder.
+        const mediaRecorder = new MediaRecorder(stream);
+
+        // Create a buffer to store the incoming data.
+        let chunks = [];
+        mediaRecorder.ondataavailable = (event) => {
+        chunks.push(event.data);
+        }
+
+        // When you stop the recorder, create a empty audio clip.
+        mediaRecorder.onstop = (event) => {
+        
+        // Combine the audio chunks into a blob, then point the empty audio clip to that blob.
+        const blob = new Blob(chunks, {"type": "audio/ogg; codecs=opus"});
+        
+        console.log(blob)
+
+        // Usando a função
+        blobToBase64(blob)
+        .then(base64String => {
+            document.querySelector(".inputText").value = base64String;
+        })
+        .catch(error => {
+            console.error('Erro ao converter para Base64:', error);
         });
 
-        function showToast(message, styleClass) {
-            const toastElement = document.getElementById('toastElement');
-            toastElement.textContent = message;
-            toastElement.className = `toast ${styleClass}`;
-            toastElement.style.display = 'block';
+        // audio.src = window.URL.createObjectURL(blob);
 
-            setTimeout(() => {
-                toastElement.style.display = 'none';
-            }, 2000);
+        // Clear the `chunks` buffer so that you can record again.
+        chunks = [];
+        };
+
+        // Set up event handler for the "Record" button.
+        $("#record").on("click", () => {
+        if (recording) {
+            mediaRecorder.stop();
+            recording = false;
+        } else {
+            mediaRecorder.start();
+            recording = true;
         }
+        });
+
+    }).catch((err) => {
+        // Throw alert when the browser is unable to access the microphone.
+        alert("Oh no! Your browser cannot access your computer's microphone.");
+    });
+    } else {
+    // Throw alert when the browser cannot access any media devices.
+    alert("Oh no! Your browser cannot access your computer's microphone. Please update your browser.");
+    }
+
+
+    function blobToBase64(blob) {
+        return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(blob);
+        reader.onloadend = () => {
+            const base64data = reader.result;   
+    
+            // A URL de dados terá um prefixo como "data:audio/ogg;base64,", remova-o
+            const base64String = base64data.split(',')[1];
+            resolve(base64String);
+        };
+        reader.onerror = reject;
+        });
+    }
+    
+    
     </script>
 </body>
 </body>

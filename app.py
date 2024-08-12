@@ -7,6 +7,7 @@ from PIL import Image
 import google.generativeai as genai
 import edge_tts
 from base64 import b64encode
+from google.cloud import speech
 
 app = Flask(__name__)
 CORS(app) # Habilitar CORS para todas as rotas da sua aplicação
@@ -32,9 +33,11 @@ def describe_image():
         return jsonify({'error': 'No image data sent in request body'}), 400
     
     if 'context' not in request.json or request.json['context'] == '':
-        context = 'Descreva com detalhes em Portgues Brasil'
+        context = 'Descreva com detalhes'
+        isContext = False
     else:
         context = request.json['context']
+        isContext = True
 
     try:
         # Decodifica a base64 para obter os bytes da imagem
@@ -43,7 +46,13 @@ def describe_image():
         # Converte os bytes em um objeto de imagem
         image = Image.open(io.BytesIO(image_data))
 
-        response = model.generate_content([context, image])
+        newContext = context
+        if (isContext) :
+            newContext = transcribe_audio(context)
+
+        newContext = newContext + " Em Português Brasil, por gentileza."
+
+        response = model.generate_content([newContext, image])
         response.resolve()
 
         communicate = edge_tts.Communicate(text=response.text, voice=VOICE, rate="+30%")
@@ -66,3 +75,29 @@ def describe_image():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 400
+
+
+def transcribe_audio(audio_base64):
+    # Decodifica o áudio base64
+    audio_bytes = base64.b64decode(audio_base64)
+
+    # Cria o cliente do Google Cloud Speech-to-Text
+    # client = speech.SpeechClient.from_service_account_file("C:/secrets/key.json") # rodar local
+    client = speech.SpeechClient.from_service_account_file("/etc/secrets/key.json")
+
+    # Configura a requisição
+    audio = speech.RecognitionAudio(content=audio_bytes)
+    config = speech.RecognitionConfig(
+        encoding=speech.RecognitionConfig.AudioEncoding.MP3, 
+
+        sample_rate_hertz=48000,
+        enable_automatic_punctuation=True,
+        language_code="pt-BR"
+    )
+
+    # Realiza a transcrição
+    response = client.recognize(config=config, audio=audio)
+
+    # Extrai o texto transcrito
+    for result in response.results:
+        return result.alternatives[0].transcript
