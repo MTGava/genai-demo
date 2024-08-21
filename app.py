@@ -71,7 +71,7 @@ def describe_image():
         mp3_base64 = b64encode(audio_data).decode('utf-8')
 
         # Retorna a descrição da imagem como JSON
-        return jsonify({'description': mp3_base64}), 200
+        return jsonify({'description': mp3_base64, 'text': response.text}), 200
 
     except Exception as e:
         return jsonify({'error': str(e)}), 400
