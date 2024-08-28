@@ -28,6 +28,9 @@ def home():
 @app.route('/describe', methods=['POST'])
 def describe_image():
 
+    print("Request: ")
+    print(request.json)
+
     # Verifica se a requisição contém dados
     if 'image' not in request.json:
         return jsonify({'error': 'No image data sent in request body'}), 400
