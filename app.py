@@ -14,7 +14,7 @@ CORS(app) # Habilitar CORS para todas as rotas da sua aplicação
 
 genai.configure(api_key=os.environ.get('GOOGLE_API_KEY'))
 model = genai.GenerativeModel(model_name="gemini-1.5-flash")
-VOICE = "pt-BR-AntonioNeural"
+VOICE = "pt-BR-ThalitaNeural"
 OUTPUT_FILE = "audio.mp3"
 
 @app.route('/hello-world')
@@ -50,7 +50,7 @@ def describe_image():
         if (isContext) :
             newContext = transcribe_audio(context)
 
-        newContext = newContext + " Em Português Brasil, por gentileza."
+        newContext = newContext + " Em Português Brasil, por gentileza. Em texto claro sem simbolos e quebra de linha"
 
         response = model.generate_content([newContext, image])
         response.resolve()
