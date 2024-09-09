@@ -80,6 +80,33 @@ def describe_image():
         return jsonify({'error': str(e)}), 400
 
 
+@app.route('/transcribe', methods=['GET'])
+def transcribe():
+    try:
+        args = request.args
+        text = args.get("text")
+
+        communicate = edge_tts.Communicate(text=text, voice=VOICE, rate="+30%")
+        communicate.save(OUTPUT_FILE)
+
+        with open(OUTPUT_FILE, "wb") as file:
+            for chunk in communicate.stream_sync():
+                if chunk["type"] == "audio":
+                    file.write(chunk["data"])
+
+        # Leia o arquivo MP3 como binário
+        with open('audio.mp3', 'rb') as f:
+            audio_data = f.read()
+
+        # Converta o binário em base64
+        mp3_base64 = b64encode(audio_data).decode('utf-8')
+
+        # Retorna a descrição da imagem como JSON
+        return jsonify({'description': mp3_base64}), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+
 def transcribe_audio(audio_base64):
     # Decodifica o áudio base64
     audio_bytes = base64.b64decode(audio_base64)
